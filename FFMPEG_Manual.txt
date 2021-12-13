@@ -1,0 +1,86 @@
+for /f "tokens=9 delims=\" %a in 
+	('reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\MMDevices\Audio\Capture" /s ^| find "\Properties"') do 
+	@for /f "tokens=2*" %k in 
+		('reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\MMDevices\Audio\Capture\%a\Properties" /v 
+		"{a45c254e-df1c-4efd-8020-67d146a850e0},2"') do @echo "%l"
+
+
+
+------------------------------------------------------------------------------------------------------------------------
+TAKE PICTURE:----------------------------------------------------------------------------
+.\ffmpeg.exe -f dshow -i "video=HP HD Camera" -frames:v 1 test.jpg
+
+
+CAMERA OPTIONS:----------------------------------------------------------------------------
+.\ffmpeg.exe -list_options true -f dshow -i "video=HP HD Camera"
+
+
+CAMERA+AUDIO:----------------------------------------------------------------------------
+ffmpeg -f dshow -i video="HP HD Camera":audio="Vnútorný mikrofón (Conexant ISST Audio)" out.mp4
+
+
+JOIN files:----------------------------------------------------------------------------
+ffmpeg -framerate 10 -i filename-%03d.jpg output.mp4
+ffmpeg -framerate 10 -pattern_type  glob -i "filename-*.jpg" output.mp4
+
+
+.\ffmpeg.exe -i .\a.mp4 -i .\icon.jpg -filter_complex "overlay = 20:20" out.mp4
+ffmpeg 	     video_to_join   icon_to_join 		umiesnenie_X|Y  outputVideo
+
+
+
+CAPTURE SCREEN VIDEO:--------------------------------------------------
+.\ffmpeg -f gdigrab -i desktop -f dshow -i audio="Vnútorný mikrofón (Conexant ISST Audio)" -vcodec libx264 YOUR_NAME_HERE.mp4
+.\ffmpeg -f gdigrab -i desktop -vcodec libx264 YOUR_NAME_HERE.mp4
+CAPTURE SCRREENSHOT
+.\ffmpeg -f gdigrab -framerate 6 -i desktop screenschot1.jpg
+.\ffmpeg -f gdigrab -framerate 6 -offset_x 10 -offset_y 20 -video_size vga -i desktop screen.jpg
+.\ffmpeg -f gdigrab -show_region 1 -framerate 6 -video_size cif -offset_x 10 -offset_y 20 -i desktop out.mp4 ---TOTO JE PECKA
+DESKTOP/CAPTURE WINDOW AK DAM BEZDESKTOPU DA TO ERROR
+
+
+JOIN IMAGES TO VIDEO
+.\ffmpeg.exe -framerate 2 -i filename-%03d.jpg output.mp4
+
+
+SHOW DEVICES
+.\ffmpeg.exe -list_devices true -f dshow -i dummy
+
+
+CROP IMAGE TO PART
+.\ffmpeg.exe -i a.jpg -vf  "crop=50:50:50:50" input_crop.png
+-CROP TO EQUAL PARTS:
+.\ffmpeg -loop 1 -i a.jpg -vf "crop=iw/3:iw/3:mod(n\,3)*iw/3:trunc(n/3)*iw/3+(ih-iw)/2" -vframes 12 out%d.png
+ffmpeg -loop 1 -i input -vf crop=w=1000:h=500:x=0:y=n*10 -vframes 250 out%d.png
+
+
+CROP VIDEO:
+.\ffmpeg.exe -i .\go.MP4 -vf "crop=500:500:200:200" after.mp4
+
+
+SOMARINY::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+ffmpeg -loop 1 -i image.png
+ -pix_fmt yuv420p -t 5
+ promo-image.mp4
+
+
+ffmpeg -loop 1 -i image.png
+ -pix_fmt yuv420p -t 5
+ -vf scale=1920:1080
+ promo-image.mp4
+
+
+ffmpeg -f lavfi
+-i anullsrc=channel_layout=stereo:sample_rate=44100
+-loop 1 -i image.png
+-pix_fmt yuv420p -t 5
+-vf scale=1920:1080
+ promo-image.mp4
+
+
+ffmpeg -i video.mp4 -i promo-image.mp4
+-filter_complex
+"[0:v:0][0:a:0][1:v:0][1:a:0]concat=n=2:v=1:a=1[outv][outa]"
+-map "[outv]" -map "[outa]"
+video-with-promo.mp4
+
